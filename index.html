@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etsy Shop Indonesia - Diskon Spesial</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Gelasio:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Gelasio', 'serif'],
+                    },
+                    colors: {
+                        primary: '#F1641E', // Etsy Orange
+                        secondary: '#222222', 
+                        surface: '#FDFBF7', 
+                        accent: '#D32F2F', // Red for discount
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Hide scrollbar for category list */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-print-color-adjust: exact;
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900 font-sans antialiased overflow-x-hidden">
+
+    <!-- DISCLAIMER MODAL (GLASSMORPHISM) -->
+    <div id="disclaimerModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-opacity duration-500 px-4">
+        <div class="bg-gray-900/60 border border-white/10 p-8 md:p-10 rounded-3xl max-w-2xl w-full shadow-2xl relative overflow-hidden text-white">
+            <!-- Glass Background Layer -->
+            <div class="absolute inset-0 bg-white/5 backdrop-blur-xl -z-10"></div>
+            
+            <!-- STEP 1: Intro Affiliasi -->
+            <div id="discStep1" class="space-y-6 animate-fade-in">
+                <div class="flex items-center gap-4 mb-4 border-b border-white/10 pb-4">
+                    <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white text-2xl shadow-lg shadow-orange-500/20">
+                        <i class="ph-fill ph-handshake"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-serif font-bold tracking-wide">Program Affiliasi</h2>
+                        <p class="text-sm text-gray-400">Kerjasama Strategis User & Etsy Shop</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4 text-gray-200 leading-relaxed font-light">
+                    <p>
+                        Selamat datang di dashboard resmi <strong>Etsy Shop Indonesia</strong>. Halaman ini adalah gerbang kemitraan eksklusif antara Anda sebagai User dan kami.
+                    </p>
+                    <p>
+                        Program ini dirancang untuk meningkatkan <strong>Nilai Jual (Brand Value)</strong> Etsy Shop melalui partisipasi aktif Anda. Kami menjamin transparansi dan keuntungan timbal balik dalam setiap aktivitas yang Anda lakukan di sini.
+                    </p>
+                </div>
+
+                <div class="pt-6 flex justify-end">
+                    <button onclick="nextDisclaimer()" class="group bg-white text-black hover:bg-gray-200 font-bold py-3 px-8 rounded-full transition-all flex items-center gap-3">
+                        Lanjut <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: Tata Cara Kerja -->
+            <div id="discStep2" class="space-y-6 hidden animate-fade-in">
+                <div class="flex items-center gap-4 mb-4 border-b border-white/10 pb-4">
+                    <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white text-2xl shadow-lg shadow-blue-500/20">
+                        <i class="ph-fill ph-clipboard-text"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-serif font-bold tracking-wide">Tata Cara Kerja</h2>
+                        <p class="text-sm text-gray-400">Panduan Wajib Affiliasi</p>
+                    </div>
+                </div>
+
+                <ul class="space-y-4 text-sm md:text-base text-gray-200 font-light">
+                    <li class="flex gap-4 items-start">
+                        <span class="bg-white/10 text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs flex-shrink-0 mt-0.5">1</span>
+                        <span><strong>Wajib Download APK:</strong> User wajib mendownload aplikasi <em>Etsy Shop Apk</em> yang tersedia di halaman depan web untuk mulai beraffiliasi.</span>
+                    </li>
+                    <li class="flex gap-4 items-start">
+                        <span class="bg-white/10 text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs flex-shrink-0 mt-0.5">2</span>
+                        <span><strong>Patuhi Arahan:</strong> Seluruh user wajib mengikuti semua instruksi dari aplikasi atau Customer Service (CS) yang bertugas.</span>
+                    </li>
+                    <li class="flex gap-4 items-start">
+                        <span class="bg-white/10 text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs flex-shrink-0 mt-0.5">3</span>
+                        <span><strong>Bukti Screenshot:</strong> Usahakan setiap pekerjaan memiliki bukti <em>screenshot</em> agar valid saat Admin/CS melakukan verifikasi pembayaran.</span>
+                    </li>
+                    <li class="flex gap-4 items-start">
+                        <span class="bg-white/10 text-white w-6 h-6 flex items-center justify-center rounded-full font-bold text-xs flex-shrink-0 mt-0.5">4</span>
+                        <span><strong>Pembayaran & Bonus:</strong> Pekerjaan dan pembayaran dilakukan di aplikasi sesuai data. 
+                        <span class="text-yellow-400 font-medium block mt-1"><i class="ph-fill ph-star"></i> Bonus: Undang teman bergabung dan lapor ke CS untuk mendapatkan komisi tambahan!</span></span>
+                    </li>
+                </ul>
+
+                <div class="pt-6 flex justify-end border-t border-white/10 mt-4">
+                    <button onclick="closeDisclaimer()" class="bg-primary text-white hover:bg-orange-600 font-bold py-3 px-8 rounded-full transition-all flex items-center gap-2 shadow-lg shadow-orange-900/50 transform hover:scale-105">
+                        Selesai & Masuk Dashboard <i class="ph-bold ph-check-circle text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar & Session Timer -->
+    <nav class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center h-20 gap-4 md:gap-8 justify-between">
+                <!-- Logo -->
+                <div class="flex items-center gap-2 cursor-pointer" onclick="goHome()">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-white font-serif font-bold text-xl">E</div>
+                    <span class="font-serif text-2xl md:text-3xl font-bold text-primary tracking-tight">Etsy Shop</span>
+                </div>
+
+                <!-- Session Timer Display -->
+                <div class="hidden md:flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full border border-gray-200" title="Waktu Belanja Anda">
+                    <i class="ph ph-clock text-primary text-lg"></i>
+                    <span class="text-xs text-gray-500 uppercase font-bold tracking-wider mr-1">Sesi:</span>
+                    <span id="sessionTimer" class="font-mono font-bold text-gray-800 text-lg w-20 text-center">00:00:00</span>
+                </div>
+
+                <!-- Icons & APK Button -->
+                <div class="flex items-center gap-3">
+                    <!-- Tombol Download APK (Penting untuk Disclaimer Point 1) -->
+                    <a href="https://eqnahkzghcbgtusvfble.supabase.co/storage/v1/object/public/image/affiliate.apk" class="hidden sm:flex bg-gray-900 text-white px-4 py-2 rounded-full text-xs font-bold items-center gap-2 hover:bg-gray-800 transition-colors">
+                        <i class="ph-fill ph-android-logo text-lg text-green-400"></i> Download APK
+                    </a>
+
+                    <button class="relative p-2 hover:bg-gray-100 rounded-full transition-colors group" onclick="toggleCart()">
+                        <i class="ph ph-shopping-cart text-2xl text-gray-700 group-hover:text-primary transition-colors"></i>
+                        <span id="cartCount" class="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full transform scale-0 transition-transform duration-200">0</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Timer & APK Link -->
+            <div class="md:hidden flex justify-between items-center pb-3 px-1">
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                    <i class="ph ph-clock text-primary"></i>
+                    <span id="sessionTimerMobile" class="font-mono font-bold">00:00:00</span>
+                </div>
+                <a href="https://eqnahkzghcbgtusvfble.supabase.co/storage/v1/object/public/image/affiliate.apk" class="text-xs font-bold text-blue-600 flex items-center gap-1">
+                    <i class="ph-fill ph-download-simple"></i> Etsy Shop Apk
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- VIEW 1: HOME PAGE (List Produk) -->
+    <div id="homeView" class="transition-opacity duration-300">
+        
+        <!-- Banner Diskon -->
+        <div class="max-w-7xl mx-auto px-4 mt-6">
+            <div class="bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-6 md:p-10 text-white relative overflow-hidden shadow-xl">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <div class="relative z-10">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">FLASH SALE</span>
+                        <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20">Official Partner: GARUDA INDONESIA</span>
+                    </div>
+                    <h1 class="font-serif text-3xl md:text-5xl font-bold mb-2">Etsy Shop Indonesia</h1>
+                    <p class="text-gray-300 max-w-lg mb-6">Pusat barang branded & bernilai tinggi. Dijamin aman & terpercaya.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Sort Bar -->
+        <div class="sticky top-20 z-40 bg-surface/95 backdrop-blur-sm border-b border-gray-200 py-4 shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row gap-4 justify-between items-center">
+                
+                <!-- Category Tabs -->
+                <div class="flex gap-2 overflow-x-auto scrollbar-hide w-full md:w-auto pb-1" id="categoryContainer">
+                    <!-- Categories injected via JS -->
+                </div>
+
+                <!-- Dropdown Filters -->
+                <div class="flex gap-2 w-full md:w-auto justify-end">
+                    <select id="priceFilter" onchange="applyFilters()" class="appearance-none bg-white border border-gray-300 text-gray-700 py-2 pl-4 pr-8 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer hover:border-primary transition-colors">
+                        <option value="all">Semua Harga</option>
+                        <option value="range1">Rp 100rb - 5 Juta</option>
+                        <option value="range2">Rp 5 Juta - 10 Juta</option>
+                        <option value="range3">Di Atas 10 Juta</option>
+                    </select>
+
+                    <select id="sortFilter" onchange="applyFilters()" class="appearance-none bg-white border border-gray-300 text-gray-700 py-2 pl-4 pr-8 rounded-full text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 cursor-pointer hover:border-primary transition-colors">
+                        <option value="default">Rekomendasi</option>
+                        <option value="lowToHigh">Harga Terendah</option>
+                        <option value="highToLow">Harga Tertinggi</option>
+                        <option value="az">Nama (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Grid -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-serif font-bold text-gray-900">Koleksi Eksklusif <span id="resultCount" class="text-gray-400 font-sans text-sm font-normal ml-2">(Memuat...)</span></h2>
+                <!-- Status Supabase -->
+                <div id="connectionStatus" class="hidden text-xs px-2 py-1 rounded bg-green-100 text-green-800 border border-green-200 items-center gap-1 transition-all">
+                    <!-- Content will be injected by JS -->
+                </div>
+            </div>
+            
+            <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Products injected here -->
+                 <div class="col-span-full text-center py-20 text-gray-400 animate-pulse">
+                    Memuat produk dari server...
+                 </div>
+            </div>
+        </main>
+
+        <!-- ABOUT SECTION (PROFIL TOKO) -->
+        <section class="bg-[#1a1a1a] text-white py-16 mt-12 relative overflow-hidden">
+            <!-- Decorative Elements -->
+            <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-900/20 rounded-full blur-[80px] pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    
+                    <!-- Text Content -->
+                    <div class="space-y-8">
+                        <div>
+                            <span class="text-primary font-bold tracking-wider text-sm uppercase mb-2 block">Tentang Kami</span>
+                            <h2 class="font-serif text-3xl md:text-4xl font-bold mb-4">Etsy Shop Indonesia</h2>
+                            <p class="text-gray-400 leading-relaxed text-lg">
+                                Situs penjualan barang branded eksklusif dan bernilai jual tinggi. Kami menghadirkan kemewahan dan keaslian dalam satu platform terpercaya.
+                            </p>
+                        </div>
+
+                        <!-- Founder Card -->
+                        <div class="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
+                            <div class="flex items-center gap-4 mb-4">
+                                <!-- FOTO PROFIL -->
+                                <div class="relative">
+                                    <div class="absolute inset-0 bg-primary blur-md opacity-50 rounded-full"></div>
+                                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=256&h=256&fit=crop&q=80" 
+                                         alt="Bapak Gatot Satriawan" 
+                                         class="relative w-24 h-24 rounded-full object-cover border-2 border-primary shadow-2xl">
+                                </div>
+                                
+                                <div>
+                                    <p class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-1">Diprakarsai Oleh</p>
+                                    <h3 class="text-2xl font-bold font-serif text-white">Bapak Gatot Satriawan</h3>
+                                    <p class="text-sm text-primary font-medium flex items-center gap-1">
+                                        <i class="ph-fill ph-seal-check"></i> Direktur & Pendiri
+                                    </p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-300 italic pl-4 border-l-2 border-primary/50 leading-relaxed">
+                                "Kami menjamin setiap transaksi aman. Pembayaran diawasi dan masuk langsung ke rekening resmi atas nama Bapak Gatot Satriawan, dikelola profesional oleh admin berpengalaman."
+                            </p>
+                        </div>
+
+                        <!-- Partners & Badges -->
+                        <div class="flex flex-col sm:flex-row gap-6 pt-4">
+                            <div class="flex items-center gap-3 bg-white text-gray-900 px-5 py-3 rounded-lg shadow-lg">
+                                <i class="ph-fill ph-airplane-tilt text-2xl text-blue-800"></i>
+                                <div>
+                                    <p class="text-[10px] font-bold text-gray-500 uppercase">Official Partner</p>
+                                    <p class="font-bold text-blue-900 leading-none">PT GARUDA INDONESIA</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 border border-white/20 px-5 py-3 rounded-lg">
+                                <i class="ph-fill ph-shield-check text-2xl text-green-500"></i>
+                                <div>
+                                    <p class="text-[10px] font-bold text-gray-400 uppercase">Jaminan Keamanan</p>
+                                    <p class="font-bold text-white leading-none">Rekening Resmi Owner</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Image -->
+                    <div class="relative hidden lg:block">
+                        <div class="relative rounded-2xl overflow-hidden border-4 border-white/5 shadow-2xl transform rotate-1 hover:rotate-0 transition-all duration-500">
+                            <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&q=80" alt="Etsy Shop Boutique" class="w-full h-auto object-cover opacity-80 hover:opacity-100 transition-opacity">
+                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-8">
+                                <p class="text-white font-serif text-lg">"Integritas adalah mata uang kami."</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-black text-gray-500 py-8 border-t border-gray-900">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <div class="flex justify-center items-center gap-2 mb-4">
+                    <i class="ph-fill ph-storefront text-primary text-xl"></i>
+                    <span class="font-serif font-bold text-gray-300 text-lg">Etsy Shop Indonesia</span>
+                </div>
+                <p class="text-sm mb-2">&copy; 2024 Etsy Shop Indonesia. Hak Cipta Dilindungi.</p>
+                <p class="text-xs text-gray-600">
+                    Situs ini dikelola oleh Admin Berpengalaman dibawah pengawasan sekuritas online.<br>
+                    Official Partner: PT Garuda Indonesia.
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- VIEW 2: PRODUCT DETAIL PAGE (Full Screen) -->
+    <div id="detailView" class="hidden fixed inset-0 bg-white z-[60] overflow-y-auto pt-20 pb-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-fade-in">
+            
+            <!-- Breadcrumb / Back Button -->
+            <button onclick="goHome()" class="mb-6 flex items-center gap-2 text-gray-500 hover:text-primary transition-colors font-medium group">
+                <div class="bg-gray-100 p-2 rounded-full group-hover:bg-primary/10 transition-colors">
+                    <i class="ph ph-arrow-left text-xl"></i>
+                </div>
+                Kembali ke Daftar Produk
+            </button>
+
+            <div class="flex flex-col lg:flex-row gap-10">
+                <!-- Left: Image Gallery -->
+                <div class="w-full lg:w-3/5">
+                    <div class="aspect-[4/3] bg-gray-50 rounded-2xl overflow-hidden shadow-sm border border-gray-100 relative group">
+                        <img id="detailImage" src="" alt="Product" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute top-4 left-4 bg-accent text-white font-bold px-4 py-2 rounded-lg shadow-lg">
+                            HEMAT 20%
+                        </div>
+                    </div>
+                    
+                    <!-- Trust Badge in Detail -->
+                    <div class="mt-4 flex items-center gap-3 bg-blue-50 p-4 rounded-xl border border-blue-100 text-blue-900 text-sm">
+                        <i class="ph-fill ph-shield-check text-2xl"></i>
+                        <div>
+                            <span class="font-bold block">Jaminan Keaslian Etsy Shop</span>
+                            <span>Barang ini diverifikasi langsung oleh tim Bapak Gatot Satriawan.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Product Info & Persuasion -->
+                <div class="w-full lg:w-2/5 flex flex-col">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span id="detailCategory" class="text-primary font-bold text-sm tracking-wide uppercase">Kategori</span>
+                        <span class="text-gray-300">•</span>
+                        <div class="flex text-yellow-500 text-sm">
+                            <i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i><i class="ph-fill ph-star"></i>
+                        </div>
+                        <span class="text-sm text-gray-400">(Verified)</span>
+                    </div>
+
+                    <h1 id="detailTitle" class="font-serif text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">Nama Produk</h1>
+                    
+                    <div class="flex items-baseline gap-4 mb-6 border-b border-gray-100 pb-6">
+                        <span id="detailPrice" class="text-4xl font-bold text-accent">Rp 0</span>
+                        <span id="detailOriginalPrice" class="text-xl text-gray-400 line-through decoration-gray-400 decoration-2">Rp 0</span>
+                    </div>
+
+                    <div class="bg-surface p-6 rounded-xl border border-primary/20 mb-8">
+                        <h3 class="font-serif font-bold text-lg mb-2 flex items-center gap-2">
+                            <i class="ph-fill ph-sparkle text-primary"></i> Kenapa Anda Harus Memiliki Ini?
+                        </h3>
+                        <p id="detailDesc" class="text-gray-700 leading-relaxed italic">
+                            Deskripsi persuasif...
+                        </p>
+                    </div>
+
+                    <div class="space-y-4 mt-auto">
+                        <div class="flex gap-4">
+                            <button id="btnLike" onclick="toggleLike()" class="flex-1 py-4 rounded-xl border-2 border-gray-200 hover:border-red-500 hover:text-red-500 text-gray-600 font-bold transition-all flex items-center justify-center gap-2 group">
+                                <i id="iconLike" class="ph ph-heart text-2xl group-hover:scale-110 transition-transform"></i>
+                                <span id="textLike">Suka</span>
+                            </button>
+                            <button onclick="addToCartCurrent()" class="flex-[2] bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-primary transition-colors shadow-lg shadow-gray-200 flex items-center justify-center gap-2">
+                                <i class="ph ph-shopping-bag text-xl"></i>
+                                Masukkan Keranjang
+                            </button>
+                        </div>
+                        
+                        <div class="flex items-center justify-center gap-6 text-xs text-gray-500 pt-4">
+                            <span class="flex items-center gap-1"><i class="ph-fill ph-shield-check text-green-600"></i> Rekening Resmi a.n Gatot Satriawan</span>
+                            <span class="flex items-center gap-1"><i class="ph-fill ph-truck text-blue-600"></i> Partner Garuda Indonesia</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cartOverlay" class="fixed inset-0 bg-black/50 backdrop-blur-[2px] z-[70] hidden opacity-0 transition-opacity duration-300" onclick="toggleCart()"></div>
+    <div id="cartSidebar" class="fixed top-0 right-0 h-full w-full sm:w-[400px] bg-white shadow-2xl z-[80] transform translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+            <h2 class="font-serif font-bold text-lg">Keranjang Belanja</h2>
+            <button onclick="toggleCart()" class="p-2 hover:bg-gray-100 rounded-full"><i class="ph ph-x text-xl"></i></button>
+        </div>
+        <div id="cartItems" class="flex-1 overflow-y-auto p-6 space-y-4">
+            <!-- Items -->
+        </div>
+        <div class="p-6 border-t border-gray-100 bg-gray-50">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-gray-600">Total Hemat:</span>
+                <span id="cartSavings" class="text-accent font-bold">Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center mb-6 text-lg">
+                <span class="font-bold text-gray-900">Total Bayar:</span>
+                <span id="cartTotal" class="font-bold text-gray-900">Rp 0</span>
+            </div>
+            <button onclick="checkout()" class="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-orange-700 transition-colors shadow-lg shadow-orange-200">
+                Checkout Sekarang
+            </button>
+            <p class="text-[10px] text-center text-gray-400 mt-3">
+                Pembayaran ditujukan ke Rekening Resmi a.n. Gatot Satriawan.
+            </p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-xl transform translate-y-24 transition-transform duration-500 z-[90] flex items-center gap-3">
+        <div class="bg-green-500 rounded-full p-1"><i class="ph-bold ph-check text-white text-xs"></i></div>
+        <span class="text-sm font-medium">Item berhasil ditambahkan!</span>
+    </div>
+
+    <script>
+        // --- DISCLAIMER LOGIC ---
+        function nextDisclaimer() {
+            document.getElementById('discStep1').classList.add('hidden');
+            document.getElementById('discStep2').classList.remove('hidden');
+        }
+
+        function closeDisclaimer() {
+            const modal = document.getElementById('disclaimerModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 500); // Wait for transition to finish
+        }
+
+        // --- KONFIGURASI SUPABASE ---
+        const SUPABASE_URL = 'https://eqnahkzghcbgtusvfble.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_6Gox28-79lvYBiUsGwiQvQ_kFXfxGdL';
+        let supabaseClient = null; 
+
+        // Inisialisasi Supabase Client
+        try {
+            if (window.supabase) {
+                // window.supabase adalah library, kita buat client baru dengan nama supabaseClient
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                console.log("Supabase Client initialized.");
+            }
+        } catch (error) {
+            console.error("Gagal inisialisasi Supabase:", error);
+        }
+
+        // --- DATA PRODUK FALLBACK (Digunakan jika database kosong/gagal) ---
+        const productsRaw = [
+            // --- HANDPHONE (High End) ---
+            { id: 101, name: "iPhone 15 Pro Max 1TB", category: "Handphone", originalPrice: 29999000, image: "https://images.unsplash.com/photo-1696446701796-da61225697cc?w=600&q=80", shop: "iBox Official", desc: "Titanium grade aerospace. Chip A17 Pro game-changing." },
+            { id: 102, name: "Samsung Galaxy S24 Ultra", category: "Handphone", originalPrice: 23999000, image: "https://images.unsplash.com/photo-1705623057864-4482c3f848b3?w=600&q=80", shop: "Samsung ID", desc: "Galaxy AI is here. Frame titanium dan Corning Gorilla Armor." },
+            { id: 103, name: "Google Pixel 8 Pro", category: "Handphone", originalPrice: 17500000, image: "https://images.unsplash.com/photo-1698686708386-3e8a49c47141?w=600&q=80", shop: "Google Store", desc: "Kamera pro-level dengan fitur AI Magic Editor terbaik." },
+            { id: 104, name: "Samsung Z Fold 5", category: "Handphone", originalPrice: 24999000, image: "https://images.unsplash.com/photo-1697210960007-9da4076779a7?w=600&q=80", shop: "Samsung ID", desc: "Multitasking powerhouse di saku Anda. Layar lipat 7.6 inci." },
+            { id: 105, name: "iPhone 14 Pro Deep Purple", category: "Handphone", originalPrice: 18999000, image: "https://images.unsplash.com/photo-1664478546384-d57ffe74a797?w=600&q=80", shop: "iBox Official", desc: "Dynamic Island yang ajaib. Kamera utama 48MP." },
+            { id: 106, name: "Asus ROG Phone 8 Pro", category: "Handphone", originalPrice: 19999000, image: "https://images.unsplash.com/photo-1615526675159-e248c3021d3f?w=600&q=80", shop: "ROG Store", desc: "Beyond Gaming. Performa Snapdragon 8 Gen 3 tak tertandingi." },
+            { id: 107, name: "Xiaomi 13 Ultra", category: "Handphone", originalPrice: 16999000, image: "https://images.unsplash.com/photo-1685375338166-5e5899981f92?w=600&q=80", shop: "Xiaomi Flagship", desc: "Optik Leica Summicron. Fotografi smartphone level profesional." },
+            { id: 108, name: "Sony Xperia 1 V", category: "Handphone", originalPrice: 21999000, image: "https://images.unsplash.com/photo-1596558450255-7c0b7be9d56a?w=600&q=80", shop: "Sony Mobile", desc: "Sensor Exmor T for mobile. Layar 4K OLED HDR." },
+            { id: 109, name: "Oppo Find N3 Flip", category: "Handphone", originalPrice: 15999000, image: "https://images.unsplash.com/photo-1698226027876-0f3316694367?w=600&q=80", shop: "Oppo Official", desc: "Kamera Hasselblad triple camera di hp lipat. Cover screen intuitif." },
+            
+            // --- HANDPHONE (Mid-Entry) ---
+            { id: 110, name: "Samsung Galaxy A54 5G", category: "Handphone", originalPrice: 5999000, image: "https://images.unsplash.com/photo-1681286955214-e0e024227f29?w=600&q=80", shop: "Samsung ID", desc: "Desain premium kaca. Nightography jernih dan stabil." },
+            { id: 111, name: "iPhone 13 Mini", category: "Handphone", originalPrice: 10999000, image: "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=600&q=80", shop: "iStore", desc: "Kekuatan super dalam ukuran mini. Pas di satu tangan." },
+            { id: 112, name: "Nothing Phone (2)", category: "Handphone", originalPrice: 10999000, image: "https://images.unsplash.com/photo-1693822294907-7347a829873d?w=600&q=80", shop: "Nothing Store", desc: "Glyph Interface baru. OS yang unik dan penuh karakter." },
+            { id: 113, name: "Poco F5 Pro", category: "Handphone", originalPrice: 7499000, image: "https://images.unsplash.com/photo-1606512128792-7472dd678eb0?w=600&q=80", shop: "Xiaomi", desc: "Flagship killer. Layar WQHD+ dan Snapdragon 8+ Gen 1." },
+            { id: 114, name: "Vivo V29 5G", category: "Handphone", originalPrice: 5999000, image: "https://images.unsplash.com/photo-1636245367372-b77247726cb3?w=600&q=80", shop: "Vivo Official", desc: "Aura Light Portrait. Foto malam studio-level." },
+            { id: 115, name: "Realme 11 Pro+ 5G", category: "Handphone", originalPrice: 6599000, image: "https://images.unsplash.com/photo-1627909384879-11c2105e492d?w=600&q=80", shop: "Realme Store", desc: "Kamera 200MP SuperZoom. Desain kulit vegan premium." },
+
+            // --- ELEKTRONIK (High End > 10 Juta) ---
+            { id: 201, name: "MacBook Pro M3 Max", category: "Elektronik", originalPrice: 45999000, image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&q=80", shop: "Mac Store", desc: "Monster performa. Render 3D dan edit video 8K tanpa keringat." },
+            { id: 202, name: "Leica Q3", category: "Elektronik", originalPrice: 108000000, image: "https://images.unsplash.com/photo-1606622432924-42b78ce731b8?w=600&q=80", shop: "Leica Store", desc: "Kamera full-frame compact terbaik. Lensa Summilux 28mm f/1.7." },
+            { id: 203, name: "Sony Alpha A7R V", category: "Elektronik", originalPrice: 59999000, image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=600&q=80", shop: "Sony Camera", desc: "Resolusi 61MP dengan AI Autofocus. Detail tak tertandingi." },
+            { id: 204, name: "DJI Mavic 3 Pro Cine", category: "Elektronik", originalPrice: 75000000, image: "https://images.unsplash.com/photo-1579829366248-204fe8413f31?w=600&q=80", shop: "DJI Official", desc: "Tiga kamera flagship. Mendukung Apple ProRes untuk sineas." },
+            { id: 205, name: "ASUS ROG Zephyrus G14", category: "Elektronik", originalPrice: 28999000, image: "https://images.unsplash.com/photo-1625842268584-8f3296236761?w=600&q=80", shop: "ROG Store", desc: "Laptop gaming 14 inci paling powerful & stylish. Layar OLED Nebula." },
+            { id: 206, name: "Samsung Odyssey Ark 55\"", category: "Elektronik", originalPrice: 42999000, image: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=600&q=80", shop: "Gamer Zone", desc: "Layar gaming kurva 1000R vertikal pertama di dunia." },
+            { id: 207, name: "Devialet Phantom I 108dB", category: "Elektronik", originalPrice: 55000000, image: "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=600&q=80", shop: "Audiophile", desc: "Speaker nirkabel paling ekstrem. Bass yang menggetarkan tulang." },
+            
+            // --- ELEKTRONIK (Mid Range 5-10 Juta) ---
+            { id: 208, name: "iPad Air 5 M1", category: "Elektronik", originalPrice: 9499000, image: "https://images.unsplash.com/photo-1649755490729-19e0729c1782?w=600&q=80", shop: "iBox", desc: "Kekuatan chip M1 di tablet tipis. Kreativitas tanpa batas." },
+            { id: 209, name: "PlayStation 5 Slim", category: "Elektronik", originalPrice: 8199000, image: "https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600&q=80", shop: "Sony Play", desc: "Desain lebih ramping. Ray tracing dan haptic feedback imersif." },
+            { id: 210, name: "GoPro Hero 12 Black", category: "Elektronik", originalPrice: 6999000, image: "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?w=600&q=80", shop: "GoPro", desc: "Baterai 2x lebih lama. HDR video 5.3K terbaik di kelasnya." },
+            { id: 211, name: "Marshall Stanmore III", category: "Elektronik", originalPrice: 6599000, image: "https://images.unsplash.com/photo-1589492477829-5e65395b66cc?w=600&q=80", shop: "Marshall", desc: "Audio legendaris dengan soundstage luas. Desain vintage klasik." },
+            { id: 212, name: "Dyson Supersonic Hair Dryer", category: "Elektronik", originalPrice: 7599000, image: "https://images.unsplash.com/photo-1522338140262-f46f5913618a?w=600&q=80", shop: "Dyson Official", desc: "Pengering rambut cerdas. Mencegah kerusakan akibat panas ekstrem." },
+            { id: 213, name: "Sony ZV-1 II", category: "Elektronik", originalPrice: 13999000, image: "https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=600&q=80", shop: "Sony Cam", desc: "Kamera vlog all-in-one. Lensa wide zoom serbaguna." },
+            { id: 214, name: "Nintendo Switch OLED Zelda", category: "Elektronik", originalPrice: 5699000, image: "https://images.unsplash.com/photo-1612869584675-99d750016c4f?w=600&q=80", shop: "Nintendo", desc: "Edisi spesial Tears of the Kingdom. Layar OLED 7 inci." },
+            { id: 215, name: "Samsung Galaxy Tab S9 FE", category: "Elektronik", originalPrice: 6999000, image: "https://images.unsplash.com/photo-1561154464-82e9adf32764?w=600&q=80", shop: "Samsung ID", desc: "Tablet tahan air & debu. Termasuk S Pen untuk kreator." },
+
+            // --- ELEKTRONIK (Entry < 5 Juta) ---
+            { id: 216, name: "Fujifilm Instax Mini Evo", category: "Elektronik", originalPrice: 2999000, image: "https://images.unsplash.com/photo-1637774797171-460b64d1421f?w=600&q=80", shop: "Fujifilm ID", desc: "10 lensa x 10 efek film. Cetak langsung dari smartphone." },
+            { id: 217, name: "Sony WH-CH720N", category: "Elektronik", originalPrice: 1599000, image: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=600&q=80", shop: "Sony Audio", desc: "Headphone noise cancelling paling ringan dan nyaman." },
+            { id: 218, name: "JBL Flip 6", category: "Elektronik", originalPrice: 1999000, image: "https://images.unsplash.com/photo-1629235824965-0da324b17937?w=600&q=80", shop: "JBL Audio", desc: "Suara bold, desain tahan air IP67. Pesta di mana saja." },
+            { id: 219, name: "Kindle Paperwhite 5", category: "Elektronik", originalPrice: 2450000, image: "https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=600&q=80", shop: "Book Store", desc: "Layar 6.8 inci, warm light yang bisa diatur. Tahan air." },
+            { id: 220, name: "Xiaomi Monitor A27i", category: "Elektronik", originalPrice: 1599000, image: "https://images.unsplash.com/photo-1547119957-6329106e280e?w=600&q=80", shop: "Xiaomi", desc: "Layar IPS 100Hz. Desain ramping untuk setup minimalis." },
+            { id: 221, name: "Logitech MX Keys S", category: "Elektronik", originalPrice: 1699000, image: "https://images.unsplash.com/photo-1587829741301-dc798b91add1?w=600&q=80", shop: "Logitech", desc: "Keyboard mengetik presisi. Smart illumination dan macro." },
+            { id: 222, name: "Razer BlackShark V2 X", category: "Elektronik", originalPrice: 899000, image: "https://images.unsplash.com/photo-1619983081563-430f63602796?w=600&q=80", shop: "Razer Store", desc: "Headset esports ringan. Driver Triforce 50mm jernih." },
+
+            // --- FASHION (Luxury Bags > 10 Juta) ---
+            { id: 301, name: "Hermès Birkin 30 Black", category: "Fashion", originalPrice: 450000000, image: "https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=600&q=80", shop: "Luxury Preloved", desc: "The Holy Grail. Kulit Togo hitam dengan hardware emas." },
+            { id: 302, name: "Chanel Classic Flap Medium", category: "Fashion", originalPrice: 165000000, image: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&q=80", shop: "Paris Boutique", desc: "Investasi abadi. Lambskin hitam dengan rantai emas." },
+            { id: 303, name: "Dior Lady Dior Mini", category: "Fashion", originalPrice: 85000000, image: "https://images.unsplash.com/photo-1598532163257-ae3c6b2524b6?w=600&q=80", shop: "Dior Boutique", desc: "Tas ikonik Putri Diana. Cannage stitching yang elegan." },
+            { id: 304, name: "Louis Vuitton Speedy 25", category: "Fashion", originalPrice: 28000000, image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=600&q=80", shop: "LV Official", desc: "Kanvas Monogram klasik. Tas kota yang sempurna." },
+            { id: 305, name: "Gucci Jackie 1961", category: "Fashion", originalPrice: 42000000, image: "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&q=80", shop: "Gucci Store", desc: "Gaya boho-chic. Favorit Jackie Kennedy." },
+            { id: 306, name: "Prada Cleo Brushed", category: "Fashion", originalPrice: 38000000, image: "https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=600&q=80", shop: "Prada Milano", desc: "Desain minimalis 90-an yang futuristik." },
+            { id: 307, name: "YSL LouLou Medium", category: "Fashion", originalPrice: 45000000, image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600&q=80", shop: "Saint Laurent", desc: "Kulit matelassé 'Y' yang ikonik dan lembut." },
+            { id: 308, name: "Bottega Veneta Jodie", category: "Fashion", originalPrice: 52000000, image: "https://images.unsplash.com/photo-1585916420730-d7f95e942d43?w=600&q=80", shop: "Bottega Store", desc: "Anyaman Intrecciato khas Italia dengan simpul unik." },
+            { id: 309, name: "Celine Triomphe", category: "Fashion", originalPrice: 58000000, image: "https://images.unsplash.com/photo-1575296093822-980cb36a946b?w=600&q=80", shop: "Celine Paris", desc: "Logo Triomphe emas yang menjadi pusat perhatian." },
+            { id: 310, name: "Loewe Puzzle Bag", category: "Fashion", originalPrice: 48000000, image: "https://images.unsplash.com/photo-1616766444837-1478c9163e00?w=600&q=80", shop: "Loewe Spain", desc: "Karya seni geometris. Bisa dipakai 5 cara berbeda." },
+            { id: 311, name: "Balenciaga City Neo", category: "Fashion", originalPrice: 35000000, image: "https://images.unsplash.com/photo-1594633313593-bab3825d0caf?w=600&q=80", shop: "Balenciaga", desc: "Gaya rocker chic dengan hardware studs khas." },
+            { id: 312, name: "Goyard Saint Louis PM", category: "Fashion", originalPrice: 28000000, image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=600&q=80", shop: "Maison Goyard", desc: "Kanvas Goyardine yang ringan dan eksklusif." },
+            { id: 313, name: "Hermès Kelly 28 Gold", category: "Fashion", originalPrice: 420000000, image: "https://images.unsplash.com/photo-1626947346165-4c22880c2ea2?w=600&q=80", shop: "Hermès Private", desc: "Simbol keanggunan. Lebih terstruktur dibanding Birkin." },
+            { id: 314, name: "Fendi Baguette", category: "Fashion", originalPrice: 48000000, image: "https://images.unsplash.com/photo-1594223516560-639145612f0c?w=600&q=80", shop: "Fendi Roma", desc: "Tas 'It Bag' pertama di dunia. Ikonik." },
+            { id: 315, name: "Jacquemus Le Chiquito", category: "Fashion", originalPrice: 12000000, image: "https://images.unsplash.com/photo-1591561954555-607968c989ab?w=600&q=80", shop: "Jacquemus", desc: "Tas mikro viral. Statement piece fashionista." },
+
+            // --- FASHION (Mid-Entry & Shoes) ---
+            { id: 316, name: "Tory Burch McGraw Camera", category: "Fashion", originalPrice: 6500000, image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=80", shop: "Tory Burch", desc: "Tas selempang elegan untuk sehari-hari." },
+            { id: 317, name: "Marc Jacobs The Tote Bag", category: "Fashion", originalPrice: 5200000, image: "https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&q=80", shop: "Marc Jacobs", desc: "Tas kanvas paling hits. Muat segala barang." },
+            { id: 318, name: "Coach Tabby Shoulder Bag", category: "Fashion", originalPrice: 8500000, image: "https://images.unsplash.com/photo-1627123424574-181ce90b99c6?w=600&q=80", shop: "Coach Official", desc: "Desain arsip 1970an dengan sentuhan modern." },
+            { id: 319, name: "Nike Air Jordan 1 Chicago", category: "Fashion", originalPrice: 28000000, image: "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?w=600&q=80", shop: "Sneaker Head", desc: "The Lost & Found. Sneaker paling dicari kolektor." },
+            { id: 320, name: "Adidas Yeezy Boost 350", category: "Fashion", originalPrice: 5500000, image: "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?w=600&q=80", shop: "Sneaker Vault", desc: "Kenyamanan Boost legendaris. Desain primeknit." },
+            { id: 321, name: "New Balance 9060", category: "Fashion", originalPrice: 2599000, image: "https://images.unsplash.com/photo-1663935269727-2f7752762a4d?w=600&q=80", shop: "NB Store", desc: "Gaya futuristik Y2K. Sangat nyaman untuk jalan." },
+            { id: 322, name: "Herschel Little America", category: "Fashion", originalPrice: 1650000, image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80", shop: "Herschel", desc: "Ransel klasik pendaki gunung untuk perkotaan." },
+            { id: 323, name: "Coach Card Case", category: "Fashion", originalPrice: 1250000, image: "https://images.unsplash.com/photo-1627123424574-181ce90b99c6?w=600&q=80", shop: "Coach Official", desc: "Dompet kartu kulit asli. Simpel dan elegan." },
+            { id: 324, name: "Longchamp Le Pliage", category: "Fashion", originalPrice: 2200000, image: "https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=600&q=80", shop: "Longchamp", desc: "Tas lipat nilon ringan. Favorit traveler." },
+
+            // --- AKSESORIS (Watches & Others) ---
+            { id: 401, name: "Rolex Submariner Date", category: "Aksesoris", originalPrice: 225000000, image: "https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=600&q=80", shop: "Rolex Official", desc: "Jam tangan penyelam referensi dunia." },
+            { id: 402, name: "Patek Philippe Nautilus", category: "Aksesoris", originalPrice: 1500000000, image: "https://images.unsplash.com/photo-1622434641406-a158123450f9?w=600&q=80", shop: "Timepiece", desc: "Kemewahan sport yang sangat langka." },
+            { id: 403, name: "Omega Speedmaster Moonwatch", category: "Aksesoris", originalPrice: 110000000, image: "https://images.unsplash.com/photo-1620625020138-1ee435252b46?w=600&q=80", shop: "Omega Boutique", desc: "Jam tangan pertama yang dipakai di bulan." },
+            { id: 404, name: "Tag Heuer Monaco", category: "Aksesoris", originalPrice: 95000000, image: "https://images.unsplash.com/photo-1526045431048-f857369baa09?w=600&q=80", shop: "Tag Heuer", desc: "Ikon balap mobil berbentuk kotak yang legendaris." },
+            { id: 405, name: "Apple Watch Ultra 2", category: "Aksesoris", originalPrice: 15999000, image: "https://images.unsplash.com/photo-1664478791550-6c92518e8d2e?w=600&q=80", shop: "iBox", desc: "Jam petualang paling tangguh. Titanium case." },
+            { id: 406, name: "Garmin Fenix 7 Pro", category: "Aksesoris", originalPrice: 16999000, image: "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=600&q=80", shop: "Garmin", desc: "Multisport GPS watch dengan solar charging." },
+            { id: 407, name: "Samsung Galaxy Watch 6 Classic", category: "Aksesoris", originalPrice: 5999000, image: "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&q=80", shop: "Samsung ID", desc: "Bezel putar fisik kembali. Pelacak kesehatan canggih." },
+            { id: 408, name: "Fossil Gen 6 Hybrid", category: "Aksesoris", originalPrice: 3500000, image: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=600&q=80", shop: "Fossil Store", desc: "Gaya klasik, fitur pintar. Baterai tahan lama." },
+            { id: 409, name: "Casio G-Shock CasiOak", category: "Aksesoris", originalPrice: 1850000, image: "https://images.unsplash.com/photo-1620625515032-608143f81a15?w=600&q=80", shop: "Casio ID", desc: "Tipis, tangguh, desain oktagonal modern." },
+            { id: 410, name: "Ray-Ban Aviator Classic", category: "Aksesoris", originalPrice: 2200000, image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600&q=80", shop: "Optik Seis", desc: "Kacamata pilot yang tak lekang oleh waktu." },
+            { id: 411, name: "Gentle Monster Sunglasses", category: "Aksesoris", originalPrice: 4500000, image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=600&q=80", shop: "Gentle Monster", desc: "Desain avant-garde favorit artis Korea." },
+            { id: 412, name: "Anker Soundcore Liberty 4", category: "Aksesoris", originalPrice: 1999000, image: "https://images.unsplash.com/photo-1606220588913-b3aacb4d2f46?w=600&q=80", shop: "Anker Ind", desc: "TWS premium dengan sensor detak jantung." }
+        ];
+
+        // --- STATE & CONFIG ---
+        let products = []; // Akan diisi dari fetch atau fallback
+        let cart = [];
+        let activeCategory = 'Semua';
+        let currentDetailId = null;
+        let likedProducts = new Set();
+        let sessionSeconds = 0;
+
+        const formatRupiah = (n) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
+
+        // --- FUNGSI FETCH DARI SUPABASE ---
+        async function fetchProducts() {
+            if (!supabaseClient) {
+                console.warn("Supabase tidak aktif, menggunakan data lokal.");
+                return processProducts(productsRaw);
+            }
+
+            try {
+                // Asumsi nama tabel adalah 'products'
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .select('*');
+
+                if (error) {
+                     // Throw agar ditangkap oleh catch
+                     throw error;
+                }
+
+                if (data && data.length > 0) {
+                    // Mapping data dari Supabase ke format aplikasi
+                    // Sesuaikan nama kolom jika berbeda di database Anda
+                    const mappedData = data.map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        category: item.category,
+                        originalPrice: item.original_price || item.originalPrice || 0,
+                        image: item.image_url || item.image,
+                        shop: item.shop_name || item.shop,
+                        desc: item.description || item.desc || ""
+                    }));
+                    
+                    const statusEl = document.getElementById('connectionStatus');
+                    statusEl.classList.remove('hidden');
+                    statusEl.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-200');
+                    statusEl.classList.add('bg-green-100', 'text-green-800', 'border-green-200', 'flex');
+                    statusEl.innerHTML = '<div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div> Terhubung ke Supabase';
+
+                    return processProducts(mappedData);
+                } else {
+                    console.log("Data Supabase kosong, menggunakan fallback.");
+                    return processProducts(productsRaw);
+                }
+            } catch (err) {
+                 // Check if error message relates to table not found
+                if (err.message.includes("Could not find the table") || err.code === '42P01') {
+                     console.warn("Tabel 'products' belum dibuat di Supabase. Menggunakan data bawaan (lokal).");
+                     // Show offline status
+                     const statusEl = document.getElementById('connectionStatus');
+                     statusEl.classList.remove('hidden');
+                     statusEl.classList.remove('bg-green-100', 'text-green-800', 'border-green-200');
+                     statusEl.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-200', 'flex');
+                     statusEl.innerHTML = '<div class="w-2 h-2 rounded-full bg-gray-400"></div> Mode Data Lokal';
+                } else {
+                     console.warn("Gagal mengambil data dari Supabase:", err.message);
+                }
+                return processProducts(productsRaw);
+            }
+        }
+
+        function processProducts(rawData) {
+            // Hitung harga diskon 20% otomatis
+            return rawData.map(p => ({
+                ...p,
+                price: Math.floor(p.originalPrice * 0.8)
+            }));
+        }
+
+        // --- INIT ---
+        async function init() {
+            // Tampilkan loading state jika perlu
+            products = await fetchProducts();
+            
+            renderCategories();
+            applyFilters(); // Initial render via filter function
+            startSessionTimer();
+        }
+
+        // --- FILTER & SORT LOGIC ---
+        function applyFilters() {
+            const priceVal = document.getElementById('priceFilter').value;
+            const sortVal = document.getElementById('sortFilter').value;
+
+            // 1. Filter Category
+            let filtered = activeCategory === 'Semua' ? products : products.filter(p => p.category === activeCategory);
+
+            // 2. Filter Price Range
+            if (priceVal === 'range1') {
+                filtered = filtered.filter(p => p.price >= 100000 && p.price <= 5000000);
+            } else if (priceVal === 'range2') {
+                filtered = filtered.filter(p => p.price > 5000000 && p.price <= 10000000);
+            } else if (priceVal === 'range3') {
+                filtered = filtered.filter(p => p.price > 10000000);
+            }
+
+            // 3. Sort Logic
+            if (sortVal === 'lowToHigh') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortVal === 'highToLow') {
+                filtered.sort((a, b) => b.price - a.price);
+            } else if (sortVal === 'az') {
+                filtered.sort((a, b) => a.name.localeCompare(b.name));
+            } else {
+                // Default: shuffle or id order (reset)
+                filtered.sort((a, b) => a.id - b.id);
+            }
+
+            renderProducts(filtered);
+        }
+
+        function renderCategories() {
+            // Get unique categories dynamically
+            const uniqueCats = ['Semua', ...new Set(products.map(p => p.category))];
+            const container = document.getElementById('categoryContainer');
+            
+            container.innerHTML = uniqueCats.map(cat => `
+                <button onclick="filterCategory('${cat}')" 
+                    class="px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all border shrink-0
+                    ${activeCategory === cat 
+                        ? 'bg-primary text-white border-primary shadow-lg shadow-orange-200' 
+                        : 'bg-white text-gray-600 border-gray-200 hover:border-primary hover:text-primary'}">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function filterCategory(cat) {
+            activeCategory = cat;
+            renderCategories(); // Update UI active state
+            applyFilters(); // Re-apply all filters
+        }
+
+        function renderProducts(items) {
+            const grid = document.getElementById('productGrid');
+            const resultCount = document.getElementById('resultCount');
+            
+            resultCount.innerText = `(${items.length} Item)`;
+
+            if(items.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-20 flex flex-col items-center">
+                        <i class="ph ph-magnifying-glass text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 font-medium">Produk tidak ditemukan.</p>
+                        <p class="text-sm text-gray-400">Coba ubah filter harga atau kategori.</p>
+                    </div>`;
+                return;
+            }
+            
+            grid.innerHTML = items.map((p, idx) => `
+                <div onclick="showProductDetail(${p.id})" 
+                     class="group bg-white rounded-xl border border-gray-100 overflow-hidden cursor-pointer hover:shadow-2xl hover:shadow-gray-200 transition-all duration-300 transform hover:-translate-y-1 fade-in" 
+                     style="animation-delay: ${Math.min(idx * 30, 500)}ms">
+                    
+                    <div class="relative aspect-square bg-gray-100 overflow-hidden">
+                        <img src="${p.image}" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="absolute top-2 right-2 bg-accent text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">-20%</div>
+                    </div>
+
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-1">
+                            <p class="text-xs text-primary font-bold uppercase tracking-wider">${p.category}</p>
+                            <span class="text-[10px] text-gray-400 bg-gray-50 px-1.5 rounded border">${p.shop}</span>
+                        </div>
+                        <h3 class="font-bold text-gray-900 leading-tight mb-2 truncate group-hover:text-primary transition-colors" title="${p.name}">${p.name}</h3>
+                        
+                        <div class="flex flex-col mt-auto">
+                            <span class="text-xs text-gray-400 line-through">${formatRupiah(p.originalPrice)}</span>
+                            <div class="flex justify-between items-center">
+                                <span class="text-lg font-bold text-accent">${formatRupiah(p.price)}</span>
+                                <button class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-gray-900 group-hover:text-white transition-all">
+                                    <i class="ph-bold ph-arrow-right"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // --- PAGE NAVIGATION & CART (SAME AS BEFORE) ---
+        function showProductDetail(id) {
+            const p = products.find(i => i.id === id);
+            if(!p) return;
+            currentDetailId = id;
+            
+            document.getElementById('detailImage').src = p.image;
+            document.getElementById('detailCategory').innerText = p.category;
+            document.getElementById('detailTitle').innerText = p.name;
+            document.getElementById('detailPrice').innerText = formatRupiah(p.price);
+            document.getElementById('detailOriginalPrice').innerText = formatRupiah(p.originalPrice);
+            document.getElementById('detailDesc').innerText = p.desc;
+            
+            updateLikeButtonUI();
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('detailView').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function goHome() {
+            document.getElementById('detailView').classList.add('hidden');
+            document.getElementById('homeView').classList.remove('hidden');
+            currentDetailId = null;
+        }
+
+        function toggleLike() {
+            if(!currentDetailId) return;
+            likedProducts.has(currentDetailId) ? likedProducts.delete(currentDetailId) : likedProducts.add(currentDetailId);
+            updateLikeButtonUI();
+        }
+
+        function updateLikeButtonUI() {
+            const btn = document.getElementById('btnLike'), icon = document.getElementById('iconLike'), text = document.getElementById('textLike');
+            if(likedProducts.has(currentDetailId)) {
+                btn.classList.add('border-red-500', 'text-red-500', 'bg-red-50'); btn.classList.remove('border-gray-200', 'text-gray-600');
+                icon.classList.remove('ph'); icon.classList.add('ph-fill'); text.innerText = "Disukai";
+            } else {
+                btn.classList.remove('border-red-500', 'text-red-500', 'bg-red-50'); btn.classList.add('border-gray-200', 'text-gray-600');
+                icon.classList.remove('ph-fill'); icon.classList.add('ph'); text.innerText = "Suka";
+            }
+        }
+
+        function addToCartCurrent() { if(currentDetailId) addToCart(currentDetailId); }
+        function addToCart(id) {
+            const p = products.find(i => i.id === id);
+            const existing = cart.find(i => i.id === id);
+            existing ? existing.qty++ : cart.push({...p, qty: 1});
+            updateCartUI();
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-24'); setTimeout(() => toast.classList.add('translate-y-24'), 2500);
+        }
+
+        function updateCartUI() {
+            document.getElementById('cartCount').innerText = cart.reduce((a,b) => a+b.qty, 0);
+            document.getElementById('cartCount').classList.toggle('scale-0', cart.length === 0);
+            
+            const list = document.getElementById('cartItems');
+            list.innerHTML = cart.length ? cart.map(i => `
+                <div class="flex gap-4 items-start animate-fade-in">
+                    <img src="${i.image}" class="w-14 h-14 rounded object-cover border">
+                    <div class="flex-1">
+                        <h4 class="text-sm font-bold line-clamp-1">${i.name}</h4>
+                        <div class="text-xs text-gray-500 mb-1">
+                            <span class="text-accent font-bold">${formatRupiah(i.price)}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center border rounded px-2 text-xs h-7">
+                                <button onclick="modQty(${i.id}, -1)" class="px-1 hover:bg-gray-100">-</button>
+                                <span class="mx-2 w-3 text-center">${i.qty}</span>
+                                <button onclick="modQty(${i.id}, 1)" class="px-1 hover:bg-gray-100">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('') : '<div class="text-center py-10"><i class="ph ph-shopping-bag text-4xl text-gray-200 mb-2"></i><p class="text-gray-400 text-sm">Keranjang kosong</p></div>';
+
+            const total = cart.reduce((a,b) => a + (b.price * b.qty), 0);
+            const originalTotal = cart.reduce((a,b) => a + (b.originalPrice * b.qty), 0);
+            document.getElementById('cartTotal').innerText = formatRupiah(total);
+            document.getElementById('cartSavings').innerText = formatRupiah(originalTotal - total);
+        }
+
+        function modQty(id, n) {
+            const item = cart.find(i => i.id === id);
+            if(item) { item.qty += n; if(item.qty <= 0) cart = cart.filter(i => i.id !== id); updateCartUI(); }
+        }
+
+        function toggleCart() {
+            const sb = document.getElementById('cartSidebar'), ov = document.getElementById('cartOverlay');
+            const hidden = sb.classList.contains('translate-x-full');
+            sb.classList.toggle('translate-x-full', !hidden);
+            if(hidden) { ov.classList.remove('hidden'); setTimeout(() => ov.classList.remove('opacity-0'), 10); } 
+            else { ov.classList.add('opacity-0'); setTimeout(() => ov.classList.add('hidden'), 300); }
+        }
+
+        // --- CHECKOUT LOGIC WITH SUPABASE ---
+        async function checkout() {
+            if(cart.length === 0) return alert('Keranjang kosong');
+            
+            if (supabaseClient) {
+                // Simulasi menyimpan order ke tabel 'orders'
+                // Pastikan tabel 'orders' memiliki kolom jsonb 'items' dan numeric 'total'
+                try {
+                    const total = cart.reduce((a,b) => a + (b.price * b.qty), 0);
+                    const orderData = {
+                        items: cart,
+                        total_price: total,
+                        created_at: new Date().toISOString(),
+                        status: 'pending' // pending, paid, shipped
+                    };
+
+                    const { error } = await supabaseClient
+                        .from('orders')
+                        .insert([orderData]);
+
+                    if (error) {
+                         // Check for table not found error
+                         if (error.message.includes("Could not find the table") || error.code === '42P01') {
+                            console.warn("Tabel 'orders' belum dibuat. Pesanan diproses lokal.");
+                         } else {
+                            console.warn("Gagal menyimpan order ke Supabase:", error.message);
+                         }
+                        alert('Terima kasih! Pesanan Anda akan diproses (Mode Offline).');
+                    } else {
+                        alert('Terima kasih! Pesanan Anda telah tersimpan di sistem kami.');
+                    }
+                } catch (err) {
+                    alert('Terima kasih! Pesanan Anda akan diproses.');
+                }
+            } else {
+                alert('Terima kasih! Pesanan Anda akan diproses.');
+            }
+
+            cart = []; 
+            updateCartUI(); 
+            toggleCart();
+        }
+
+        function startSessionTimer() {
+            setInterval(() => {
+                sessionSeconds++;
+                const hrs = Math.floor(sessionSeconds / 3600), mins = Math.floor((sessionSeconds % 3600) / 60), secs = sessionSeconds % 60;
+                const timeString = (hrs<10?"0"+hrs:hrs)+":"+(mins<10?"0"+mins:mins)+":"+(secs<10?"0"+secs:secs);
+                document.getElementById('sessionTimer').innerText = timeString;
+                document.getElementById('sessionTimerMobile').innerText = timeString;
+            }, 1000);
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
